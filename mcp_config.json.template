@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "tushare": {
+      "command": "python",
+      "args": ["server.py"],
+      "cwd": "/path/to/your/tushare_mcp",
+      "env": {
+        "TUSHARE_TOKEN": "YOUR_TUSHARE_TOKEN_HERE"
+      }
+    }
+  }
+}
