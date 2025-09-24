@@ -11,3 +11,8 @@ __pycache__/
 # Project-specific directories
 cache/
 outputs/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/

@@ -732,8 +732,8 @@ class TushareDataProvider:
 # 创建 MCP 服务器
 server = Server("tushare-mcp-server")
 
-# 全局数据提供器
-data_provider = TushareDataProvider()
+# 全局数据提供器, 将在初始化时创建
+data_provider: Optional[TushareDataProvider] = None
 
 
 @server.list_tools()
@@ -1847,6 +1847,8 @@ async def handle_list_tools() -> List[types.Tool]:
 @server.call_tool()
 async def handle_call_tool(name: str, arguments: dict) -> List[types.TextContent]:
     """处理工具调用"""
+    if data_provider is None:
+        return [types.TextContent(type="text", text="错误: TushareDataProvider 未初始化。请确保服务器已正确初始化。")]
     try:
         # 基础股票数据
         if name == "get_stock_basic":
@@ -2792,12 +2794,13 @@ async def handle_call_tool(name: str, arguments: dict) -> List[types.TextContent
 
 
 async def main():
-    """主函数"""
+    """主函数, 设置并运行 MCP 服务器"""
     token = os.getenv('TUSHARE_TOKEN')
     if not token:
-        print("⚠️  建议设置 TUSHARE_TOKEN 环境变量以获得完整功能")
-        print("   访问 https://tushare.pro/ 注册并获取 Token")
+        print("⚠️  未设置 TUSHARE_TOKEN 环境变量，功能将受限。")
+        print("   请访问 https://tushare.pro/ 注册以获取 Token。")
     
+    # 在服务器运行前初始化 data_provider
     global data_provider
     data_provider = TushareDataProvider(token)
     
@@ -2808,11 +2811,17 @@ async def main():
             write_stream,
             initialization_options=InitializationOptions(
                 server_name="tushare-mcp-server",
-                server_version="1.0.0",
+                server_version="0.1.4",
                 capabilities={}
             )
         )
 
+def cli_main():
+    """命令行入口函数"""
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\n服务器已关闭。")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    cli_main()
